@@ -146,10 +146,8 @@ def evaluate_preference(dataset_type, solution_or_answer, few_shot_separator, ex
     prediction1_correctness = match_fn(prediction1_processed, answer_processed)
     prediction2_processed = process_sample(raw_prediction2, few_shot_separator, extract_last_occurrence)
     prediction2_correctness = match_fn(prediction2_processed, answer_processed)
-    if prediction1_correctness and not prediction2_correctness:
-        return [1,0]
-    elif not prediction1_correctness and prediction2_correctness:
-        return [0,1]
+    if prediction1_correctness != prediction2_correctness:
+        return prediction1_correctness > prediction2_correctness
     else:
         return soft_pref
     

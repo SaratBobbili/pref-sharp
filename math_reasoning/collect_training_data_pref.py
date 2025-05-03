@@ -2,7 +2,7 @@ import argparse
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, set_seed, DataCollatorForLanguageModeling
 from classifier import CustomLlamaForSequenceClassification, CustomValueGuidedLogitProcessor
-from accuracy_utils import sample_match_strict, numeric_or_symbolic_correctness, quick_evaluate_single
+from accuracy_utils import sample_match_strict, numeric_or_symbolic_correctness, quick_evaluate_single, evaluate_preference
 from utils import read_jsonl, tokenize_with_chat_template, generate_with_classifier_guidance, get_parent_directory, resolve_dict_value, get_output_indices
 import json
 import os
@@ -151,6 +151,11 @@ classifier_model = CustomLlamaForSequenceClassification.from_pretrained(classifi
                                                                         loss_type=loss_type, use_bias=use_bias, classifier_type=classifier_type,
                                                                         device_map=device, num_atoms=num_atoms,
                                                                         V_min=V_min, V_max=V_max)
+scoring_model_id = "nvidia/OpenMath2-Llama3.1-8B"
+scoring_model = AutoModelForCausalLM.from_pretrained(scoring_model_id)
+scoring_tokenizer = AutoTokenizer.from_pretrained(scoring_model_id)
+
+scoring_model.eval()
 ref_model.eval()
 classifier_model.eval()
 torch.set_grad_enabled(False)  # disable gradients globally
@@ -245,8 +250,22 @@ for i in range(num_samples):
             current_batch_partial_guided_pred_correctness = []
             for k in range(len(queries)):
                 solution_or_answer = str(train_data_to_infer[batch_indices[k]][answer_key])
-                prediction_correctness = quick_evaluate_single(dataset_type, solution_or_answer, None, True, match_fn, partial_guided_predictions[k])
-                current_batch_partial_guided_pred_correctness.append(prediction_correctness)
+                partial_guided_solution = train_data_to_infer[batch_indices[k]]['prompt'] + " " + partial_guided_predictions[k]
+                fully_guided_solution = train_data_to_infer[batch_indices[k]]['prompt'] + " " + current_outputs_text[k]
+                partially_guided_solution_inputs = scoring_tokenizer(partial_guided_solution, return_tensors="pt")
+                fully_guided_solution_inputs = scoring_tokenizer(fully_guided_solution, return_tensors="pt")
+                # Get the input_ids (tokens) from the tokenized input
+                partially_guided_solution_input_ids = partially_guided_solution_inputs["input_ids"]
+                fully_guided_solution_input_ids = fully_guided_solution_inputs["input_ids"]
+
+                partially_guided_solution_outputs = scoring_model(input_ids=partially_guided_solution_input_ids,labels=partially_guided_solution_input_ids)
+                fully_guided_solution_outputs = scoring_model(input_ids=fully_guided_solution_input_ids,labels=fully_guided_solution_input_ids)
+
+                soft_pref = torch.exp(partially_guided_solution_outputs.loss) < torch.exp(fully_guided_solution_outputs.loss)
+                soft_pref = soft_pref.item()
+                
+                prediction_preference = evaluate_preference(dataset_type, solution_or_answer, None, True, match_fn, partial_guided_predictions[k],current_outputs_text[k],soft_pref)
+                current_batch_partial_guided_pred_correctness.append(prediction_preference)
 
             for k in range(len(queries)):
                 if 'partial_guided_prompts_tokenized' not in train_data_to_infer[batch_indices[k]]:
