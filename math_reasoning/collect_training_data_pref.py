@@ -32,7 +32,7 @@ parser.add_argument('--train_eval_save_path', default=None, type=str,
                     help='train eval split dataset/gsm8k_train_eval.json')
 parser.add_argument('--batch_size', default=8, type=int, help='batch size')
 parser.add_argument('--num_samples', default=16, type=int, help='number of samples per problem')
-parser.add_argument('--num_samples_context', default=32, type=int, help='number of comparison pairs per context per problem')
+parser.add_argument('--num_samples_context', default=8, type=int, help='number of comparison pairs per context per problem')
 parser.add_argument('--use_chat_template', default=None, type=int, help='whether to use chat template for generation')
 parser.add_argument('--eta', default=None, type=float,
                     help='eta for the classifier, larger it is, less KL regularization. Unused for expectation inference mode')
@@ -172,20 +172,20 @@ for i in range(num_samples):
     repeat_index = i
     current_seed = seed + 50 * repeat_index
     print('repeat {0}'.format(repeat_index))
-    if not force:
-        existing_data_paths = glob.glob(os.path.join(output_dir, '*_r{0}.json'.format(repeat_index)))
-        existing_indices = [int(os.path.basename(path).split('_')[0]) for path in existing_data_paths]
-    else:
-        existing_indices = []
-    for comparison_index in range(num_samples_context):
+    for comparison_index in tqdm(range(num_samples_context)):
         set_seed(current_seed)
+        if not force:
+            existing_data_paths = glob.glob(os.path.join(output_dir, '*_c{0}_r{1}.json'.format(comparison_index,repeat_index)))
+            existing_indices = [int(os.path.basename(path).split('_')[0]) for path in existing_data_paths]
+        else:
+            existing_indices = []
         train_data_to_infer = []
         for j in range(start_index, end_index):
             if j not in existing_indices:
                 train_data_to_infer.append(copy.deepcopy(train_data[j]))
         print('total number of problems to infer for repeat {0}:'.format(repeat_index), len(train_data_to_infer))
         num_batches = math.ceil(len(train_data_to_infer) / batch_size)
-        for j in range(num_batches):
+        for j in tqdm(range(num_batches)):
             batch_start_index = j * batch_size
             batch_end_index = min((j + 1) * batch_size, len(train_data_to_infer))
             batch_indices = list(range(batch_start_index, batch_end_index))
