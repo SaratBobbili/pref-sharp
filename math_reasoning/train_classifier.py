@@ -45,7 +45,7 @@ parser.add_argument('--use_bias', default=0, type=int,
                     help='whether to use bias for the classification layer, llama 3 does not have bias')
 parser.add_argument('--dataset_type', required=True, type=str, help='gsm8k')
 parser.add_argument('--data_paths', required=True, nargs='+', type=str, help='all paths to the training data')
-parser.add_argument('--batch_size', default=32, type=int, help='batch size for training classifier (max allowed)')
+parser.add_argument('--batch_size', default=8, type=int, help='batch size for training classifier (max allowed)')
 parser.add_argument('--max_batch_num_tokens', default=-1, type=int,
                     help='max number of tokens for each batch, -1 means no limit')
 parser.add_argument('--gradient_accumulation_step', default=1, type=int, help='gradient accumulation step')
@@ -75,8 +75,8 @@ parser.add_argument('--lr', default=2e-5, type=float, help='learning rate for th
 parser.add_argument('--warmup_step', default=-1, type=int, help='warmup steps for the classifier, -1 means no warmup')
 parser.add_argument('--weight_decay', default=1e-2, type=float, help='weight decay for the classifier')
 parser.add_argument('--eval_freq', default=500, type=int, help='evaluation frequency')
-parser.add_argument('--ckpt_freq', default=500, type=int, help='checkpoint frequency')
-parser.add_argument('--save_opt_scheduler', default=0, type=int, help='whether to save optimizer and scheduler state')
+parser.add_argument('--ckpt_freq', default=5000, type=int, help='checkpoint frequency')
+parser.add_argument('--save_opt_scheduler', default=1, type=int, help='whether to save optimizer and scheduler state')
 parser.add_argument('--seed', default=47, type=int, help='seed for reproduction')
 parser.add_argument('--track', default=0, type=int, help='whether to report to wandb')
 parser.add_argument('--wandb_entity', default=None, type=str, help='wandb entity')
@@ -211,10 +211,12 @@ for i in range(len(all_data)):
     current_rewards = []
     for j in range(len(current_data[reward_key])):
         current_reward = int(current_data[reward_key][j])
-        current_reward -= shift_reward
-        if inference_mode == 'expectation' and not args.cd_baseline:
-            current_reward = np.exp(eta * current_reward)
-        assert 0 <= current_reward <= 1
+        # print('current reward from top', current_reward)
+        # current_reward -= shift_reward
+        # if inference_mode == 'expectation' and not args.cd_baseline:
+        #     current_reward = np.exp(eta * current_reward)
+        #     print('current reward', current_reward)
+        # assert 0 <= current_reward <= 1
         current_rewards.append(current_reward)
     current_data['reward'] = current_rewards
 

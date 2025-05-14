@@ -31,8 +31,8 @@ parser.add_argument('--data_path', default=None, type=str, help='path to the dat
 parser.add_argument('--train_eval_save_path', default=None, type=str,
                     help='train eval split dataset/gsm8k_train_eval.json')
 parser.add_argument('--batch_size', default=8, type=int, help='batch size')
-parser.add_argument('--num_samples', default=16, type=int, help='number of samples per problem')
-parser.add_argument('--num_samples_context', default=8, type=int, help='number of comparison pairs per context per problem')
+parser.add_argument('--num_samples', default=4, type=int, help='number of samples per problem')
+parser.add_argument('--num_samples_context', default=4, type=int, help='number of comparison pairs per context per problem')
 parser.add_argument('--use_chat_template', default=None, type=int, help='whether to use chat template for generation')
 parser.add_argument('--eta', default=None, type=float,
                     help='eta for the classifier, larger it is, less KL regularization. Unused for expectation inference mode')

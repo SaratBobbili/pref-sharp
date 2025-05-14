@@ -16,7 +16,7 @@ print(args_dict)
 
 data_template_path = args.data_template_path
 data_template_paths = [os.path.join(data_template_path, '*.json')]
-output_path = os.path.join(os.path.dirname(data_template_path), 'all_train_data.jsonl')
+output_path = os.path.join(os.path.dirname(data_template_path), 'all_train_pref_data.jsonl')
 additional_keys = ['fully_guided_predictions', 'fully_guided_predictions_correctness', 'partial_guided_prompts', 'partial_guided_prompts_tokenized', 'num_response_tokens_in_partial_guided_prompts', 'partial_guided_responses_tokenized', 'partial_guided_predictions', 'partial_guided_predictions_correctness']
 problem_data_path = args.data_path
 train_eval_data_path = args.train_eval_save_path

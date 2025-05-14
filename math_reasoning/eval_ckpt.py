@@ -161,6 +161,8 @@ for i in range(len(original_examples)):
         original_id = train_eval_problems_d[original_examples[i]['problem']]['id']
         original_id_to_eval_id_d[original_id] = len(original_id_to_eval_id_d)
 
+#inference_eval_examples = inference_eval_examples[:100]
+
 # disable top_k and temperature
 generate_kwargs = {'temperature': temperature, 'top_p': top_p, 'do_sample': do_sample, 'max_new_tokens': max_new_tokens, "top_k": 0}
 model_loading_kwargs = {}
@@ -275,6 +277,8 @@ for i in range(num_samples):
 
 print('done inference, now combine results')
 
+
+
 for i in range(len(inference_eval_examples)):
     if i in skip_problems:
         continue
@@ -294,6 +298,9 @@ for i in range(len(inference_eval_examples)):
         inference_eval_examples[i]['traj_kl'].append(current_prediction_data['traj_kl'])
 
 print('done combining results, now evaluate')
+
+
+
 
 for i in range(len(inference_eval_examples)):
     if i in skip_problems:
