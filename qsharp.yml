@@ -1,4 +1,4 @@
-name: qsharp
+name: pita
 channels:
   - defaults
   - https://repo.anaconda.com/pkgs/main
@@ -154,4 +154,3 @@ dependencies:
       - wandb==0.19.9
       - xxhash==3.5.0
       - yarl==1.19.0
-prefix: /mnt/shared-scratch/Shakkottai_S/saratb/miniconda3/envs/qsharp
