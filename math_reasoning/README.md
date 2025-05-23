@@ -40,6 +40,3 @@ python eval_ckpt.py --classifier_ckpt_path checkpoints/llama_3_8b_instruct_gsm8k
 ```
 The `--eta` parameter controls the strength of the guidance. A higher value will result in more guidance.
 
-The above three steps can be run for multiple times to iteratively improve the Q# model.
-
-We also provide examples of collected data and checkpoints for the Q# model trained in [box link](https://cornell.box.com/s/quqoizybla1hnlk0uuyoxrqh2sna2qtc).
