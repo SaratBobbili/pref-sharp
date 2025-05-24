@@ -15,7 +15,7 @@ The following packages are needed to run the code:
 
 To create training data on GSM8K for Llama 3 8B Instruct:
 ```bash
-python collect_training_data.py --start_index 0 --end_index -1 --is_first_round 1 --ref_model_id meta-llama/Meta-Llama-3-8B-Instruct \
+python collect_training_data_pref.py --start_index 0 --end_index -1 --is_first_round 1 --ref_model_id meta-llama/Meta-Llama-3-8B-Instruct \
 --classifier_model_id meta-llama/Llama-3.2-1B-Instruct --classifier_type V --inference_mode bernoulli --loss_type bce --use_bias 0 --data_path dataset/gsm8k_train.jsonl \
 --train_eval_save_path dataset/gsm8k_train_eval.json --use_chat_template 1 --eta 0 --temperature 0.8 --top_p 0.9 --max_new_tokens 1024 \
  --dtype bfloat16 --match_fn_type symbolic --output_dir collected_data/llama_3_8b_instruct_gsm8k/
@@ -30,8 +30,8 @@ python combine_training_data.py --data_template_path collected_data/llama_3_8b_i
 To train the Q# model on the collected data:
 ```bash
 python train_classifier.py --ref_model_id meta-llama/Meta-Llama-3-8B-Instruct --classifier_model_id meta-llama/Llama-3.2-1B-Instruct \
---original_problems_path dataset/gsm8k_train.jsonl --train_eval_save_path dataset/gsm8k_train_eval.json --init_mode reuse --inference_mode bernoulli \
---loss_type bce --dataset_type gsm8k --data_paths collected_data/llama_3_8b_instruct_gsm8k/all_train_data.jsonl --drop_no_variation 1 --eta 1 --output_dir checkpoints/llama_3_8b_instruct_gsm8k/ --num_epochs 5
+--original_problems_path dataset/gsm8k_train.jsonl --train_eval_save_path dataset/gsm8k_train_eval.json --init_mode reuse --inference_mode expectation \
+--loss_type bce --dataset_type gsm8k --data_paths collected_data/llama_3_8b_instruct_gsm8k/all_train_pref_data.jsonl --drop_no_variation 1 --eta 1 --output_dir checkpoints/llama_3_8b_instruct_gsm8k/ --num_epochs 5
 ```
 
 To evaluate the Q# model by guiding the reference model on the GSM8K test set:
