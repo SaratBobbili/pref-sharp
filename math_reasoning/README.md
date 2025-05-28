@@ -27,14 +27,14 @@ To combine the training data with the GSM8K training data:
 python combine_training_data.py --data_template_path collected_data/llama_3_8b_instruct_gsm8k/ --data_path dataset/gsm8k_train.jsonl --train_eval_save_path dataset/gsm8k_train_eval.json
 ```
 
-To train the Q# model on the collected data:
+To train the PITA model on the collected data:
 ```bash
 python train_classifier.py --ref_model_id meta-llama/Meta-Llama-3-8B-Instruct --classifier_model_id meta-llama/Llama-3.2-1B-Instruct \
 --original_problems_path dataset/gsm8k_train.jsonl --train_eval_save_path dataset/gsm8k_train_eval.json --init_mode reuse --inference_mode expectation \
 --loss_type bce --dataset_type gsm8k --data_paths collected_data/llama_3_8b_instruct_gsm8k/all_train_pref_data.jsonl --drop_no_variation 1 --eta 1 --output_dir checkpoints/llama_3_8b_instruct_gsm8k/ --num_epochs 5
 ```
 
-To evaluate the Q# model by guiding the reference model on the GSM8K test set:
+To evaluate the PITA model by guiding the reference model on the GSM8K test set:
 ```bash
 python eval_ckpt.py --classifier_ckpt_path checkpoints/llama_3_8b_instruct_gsm8k/ckpt_15000/ --eta 10 --data_path dataset/gsm8k_test.jsonl --train_eval_save_path dataset/gsm8k_test_eval.json
 ```
