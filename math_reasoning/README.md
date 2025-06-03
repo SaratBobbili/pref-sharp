@@ -40,3 +40,33 @@ python eval_ckpt.py --classifier_ckpt_path checkpoints/llama_3_8b_instruct_gsm8k
 ```
 The `--eta` parameter controls the strength of the guidance. A higher value will result in more guidance.
 
+To train the Q#HF classifier on the collected data, first train the reward model:
+```bash
+python train_reward_model.py --data_path collected_data/all_train_data.jsonl --model_name meta-llama/Llama-3.2-1B-Instruct --output_dir ./reward_model
+```
+
+Then add the Q#HF rewards to the collected data:
+```bash
+python add_learnt_rewards.py --input_path collected_data/all_train_data.jsonl --reward_model_path ./reward_model --output_path collected_data/all_train_data_with_learnt_rewards.jsonl
+```
+
+Then train the Q#HF classifier (make sure to switch the reward key to Q#HF reward key created in previous step):
+```bash
+python train_classifier.py --ref_model_id meta-llama/Meta-Llama-3-8B-Instruct --classifier_model_id meta-llama/Llama-3.2-1B-Instruct \
+--original_problems_path dataset/gsm8k_train.jsonl --train_eval_save_path dataset/gsm8k_train_eval.json --init_mode reuse --inference_mode expectation \
+--loss_type mle --dataset_type gsm8k --data_paths collected_data/all_train_data_with_learnt_rewards.jsonl --drop_no_variation 1 --eta 1 --output_dir checkpoints/llama_3_8b_instruct_gsm8k/ --num_epochs 5
+```
+
+To evaluate the Q#HF classifier by guiding the reference model on the GSM8K test set:
+```bash
+python eval_ckpt.py --classifier_ckpt_path checkpoints/llama_3_8b_instruct_gsm8k/ckpt_15000/ --eta 10 --data_path dataset/gsm8k_test.jsonl --train_eval_save_path dataset/gsm8k_test_eval.json
+```
+
+
+
+
+
+
+
+
+
