@@ -196,7 +196,7 @@ class Transformer(nn.Module):
         return out
 
     @torch.no_grad()
-    def generate_with_classifier(self, classifier, eta, guide_with_cd, idx, max_new_tokens, temperature=1.0, top_k=None):
+    def generate_with_classifier(self, classifier, eta, guide_class, idx, max_new_tokens, temperature=1.0, top_k=None):
         assert self.config.teacherless_token is None, "Cannot use classifier with teacherless token"
         assert eta > 0
         out = idx.clone()
@@ -214,13 +214,19 @@ class Transformer(nn.Module):
                 classifier_logits.append(classifier_out)
             classifier_logits = torch.cat(classifier_logits, dim=-1)  # [bs, top_k]
             bernoulli_probs = torch.sigmoid(classifier_logits)
-            if guide_with_cd:
+            #print(bernoulli_probs[0])
+            if guide_class == 1:
                 # log (p/eta)
                 qs = torch.log(bernoulli_probs / eta)  # [bs, top_k]
+            elif guide_class == 2:
+                ratio  = bernoulli_probs / (1 - bernoulli_probs)
+                ratio = torch.clamp(ratio, min=1e-2, max=1-1e-2)
+                qs = torch.log(ratio)/eta      
             else:
                 # log (p*exp(1/eta) + 1-p)
                 # qs = torch.log(bernoulli_probs * (math.e ** (1/eta)) + (1-bernoulli_probs))
                 qs = torch.logaddexp(torch.log(bernoulli_probs) + 1/eta, torch.log(1-bernoulli_probs))  # [bs, top_k]
+                #print(qs[0])
             logits = torch.scatter_add(logits, 1, topk_idxs, qs)
             probs = F.softmax(logits, dim=-1)
             idx_next = torch.multinomial(probs, num_samples=1)

@@ -350,7 +350,9 @@ class CustomValueGuidedLogitProcessor(LogitsProcessor):
                 logit_offset = self.eta * torch.sigmoid(classifier_logits)
             else:
                 #logit_offset = F.logsigmoid(classifier_logits)
-                logit_offset = self.eta * torch.log(torch.sigmoid(classifier_logits) / (1 - torch.sigmoid(classifier_logits)))
+                ratio = torch.sigmoid(classifier_logits) / (1 - torch.sigmoid(classifier_logits))
+                ratio = torch.clamp(ratio, min=1e-6, max=1 - 1e-6)
+                logit_offset = self.eta * torch.log(ratio)
             combined_logits = self.modify_top_k_logits(ref_model_logits, logit_offset, top_k_indices)
         elif self.inference_mode == 'bernoulli':
             classifier_logits = self.get_classifier_values(input_ids, top_k_indices).float()

@@ -25,6 +25,9 @@ parser.add_argument(
     "--classifier_ckpt", type=str, required=True, help="Path to classifier checkpoint",
     )
 parser.add_argument(
+    "--classifier_pref_ckpt", type=str, required=True, help="Path to preference classifier checkpoint",
+    )
+parser.add_argument(
     "--reinforce_ckpt", type=str, required=True, help="Path to classifier checkpoint",
     )
 parser.add_argument(
@@ -106,10 +109,18 @@ classifier_model = get_model(args, is_classifier=True)
 load_from_ckpt(classifier_model, args.classifier_ckpt)
 classifier_model = torch.compile(classifier_model)
 
+
+classifier_pref_model = get_model(args, is_classifier=True)
+load_from_ckpt(classifier_pref_model, args.classifier_pref_ckpt)
+classifier_pref_model = torch.compile(classifier_pref_model)
+
+
 model.to(device)
 model.eval()
 classifier_model.to(device)
 classifier_model.eval()
+classifier_pref_model.to(device)
+classifier_pref_model.eval()
 ctx = nullcontext() if device == 'cpu' else torch.amp.autocast(device_type=device, dtype=ptdtype)
 
 all_results = {}
@@ -120,17 +131,29 @@ print(results)
 
 for eta in [1e-1]:
     print('-'*50)
+    
     print(f"Evaluating Q# with eta={eta}, top_k={args.top_k} on G({args.deg}, {args.path_len}):")
     results = evaluate.evaluate(model, test_loader, temperature=args.temperature, ctx=ctx, top_k=args.top_k, results={}, mode=f'q# ({eta=})',
-                                classifier=classifier_model, eta=eta)
+                                classifier=classifier_model, eta=eta,guide_class=0)
     all_results[f'q# ({eta})'] = results[f'q# ({eta=})/accuracy']
     print(results)
+    
 
+    print('-'*50)
+    print(f"Evaluating PITA with eta={eta}, top_k={args.top_k} on G({args.deg}, {args.path_len}):")
+    results = evaluate.evaluate(model, test_loader, temperature=args.temperature, ctx=ctx, top_k=args.top_k, results={}, mode=f'PITA ({eta=})',
+                                classifier=classifier_model, eta=eta, guide_class=2)
+    all_results[f'PITA ({eta})'] = results[f'PITA ({eta=})/accuracy']
+    print(results)
+
+    print('-'*50)
+    
     print(f"Evaluating CD with eta={eta}, top_k={args.top_k} on G({args.deg}, {args.path_len}):")
     results = evaluate.evaluate(model, test_loader, temperature=args.temperature, ctx=ctx, top_k=args.top_k, results={}, mode=f'cd ({eta=})',
-                                classifier=classifier_model, eta=eta, guide_with_cd=True)
+                                classifier=classifier_model, eta=eta, guide_class=1)
     all_results[f'cd ({eta})'] = results[f'cd ({eta=})/accuracy']
     print(results)
+    
 del classifier_model
 torch.cuda.empty_cache()
 

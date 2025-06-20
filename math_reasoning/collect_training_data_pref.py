@@ -175,7 +175,7 @@ for i in range(num_samples):
     for comparison_index in tqdm(range(num_samples_context)):
         set_seed(current_seed)
         if not force:
-            existing_data_paths = glob.glob(os.path.join(output_dir, '*_c{0}_r{1}.json'.format(comparison_index,repeat_index)))
+            existing_data_paths = glob.glob(os.path.join(output_dir, '*_c{0}_r{1}_round2.json'.format(comparison_index,repeat_index)))
             existing_indices = [int(os.path.basename(path).split('_')[0]) for path in existing_data_paths]
         else:
             existing_indices = []
@@ -293,7 +293,7 @@ for i in range(num_samples):
             # save individual problems in a batch
             for k in range(len(queries)):
                 problem_id = train_eval_problems_d[train_data_to_infer[batch_indices[k]]['problem']]['id']
-                current_problem_output_path = os.path.join(output_dir, f'{problem_id}_c{comparison_index}_r{repeat_index}.json')
+                current_problem_output_path = os.path.join(output_dir, f'{problem_id}_c{comparison_index}_r{repeat_index}_round2.json')
                 assert not os.path.exists(current_problem_output_path), f"problem {problem_id} data already exists for repeat {repeat_index}"
                 with open(current_problem_output_path, 'w') as f:
                     json.dump(train_data_to_infer[batch_indices[k]], f, indent=4)

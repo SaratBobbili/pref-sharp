@@ -6,7 +6,7 @@ from functools import partial
 
 # Function to evaluate performance when generating
 @torch.no_grad()
-def evaluate(model, loader, ctx, temperature, top_k, results=None, mode='test', eval_ratio=1.0, classifier=None, eta=0.1, guide_with_cd: bool=False):
+def evaluate(model, loader, ctx, temperature, top_k, results=None, mode='test', eval_ratio=1.0, classifier=None, eta=0.1, guide_class=0):
     """
     Generates sequences (without teacher-forcing) and calculates accuracies
     """
@@ -23,7 +23,7 @@ def evaluate(model, loader, ctx, temperature, top_k, results=None, mode='test', 
     max_num_iters = round(len(loader) * eval_ratio)
     num_iters = 0
 
-    generate_fn = model.generate if classifier is None else partial(model.generate_with_classifier, classifier, eta, guide_with_cd)
+    generate_fn = model.generate if classifier is None else partial(model.generate_with_classifier, classifier, eta, guide_class)
 
     #model.set_cache(loader.dataset.device)
     for x in bar:

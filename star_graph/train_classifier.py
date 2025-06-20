@@ -190,7 +190,10 @@ for ep in range(1, args.epochs+1):
 
         input_ids = torch.cat([d['y_pred_reject'], d['y_pred_chosen']], dim=0).to(device, non_blocking=True)
         labels = torch.cat([d['y_pred_reject_completely_correct'], d['y_pred_chosen_completely_correct']], dim=0).to(device, non_blocking=True)
+        #print(labels.shape)
         target = labels.unsqueeze(1).expand(-1, num_target_tokens).float()
+        #print(target.shape)
+        #exit(0)
         with ctx:
             logits = model(input_ids, num_target_tokens)
             token_loss = torch.nn.functional.binary_cross_entropy_with_logits(input=logits, target=target, reduction='none')

@@ -76,7 +76,7 @@ parser.add_argument('--warmup_step', default=-1, type=int, help='warmup steps fo
 parser.add_argument('--weight_decay', default=1e-2, type=float, help='weight decay for the classifier')
 parser.add_argument('--eval_freq', default=500, type=int, help='evaluation frequency')
 parser.add_argument('--ckpt_freq', default=5000, type=int, help='checkpoint frequency')
-parser.add_argument('--save_opt_scheduler', default=1, type=int, help='whether to save optimizer and scheduler state')
+parser.add_argument('--save_opt_scheduler', default=0, type=int, help='whether to save optimizer and scheduler state')
 parser.add_argument('--seed', default=47, type=int, help='seed for reproduction')
 parser.add_argument('--track', default=0, type=int, help='whether to report to wandb')
 parser.add_argument('--wandb_entity', default=None, type=str, help='wandb entity')

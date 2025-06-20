@@ -24,7 +24,7 @@ To pre-train a GPT-2 model with standard next-token prediction on a star graph w
 > python train.py --dataset graph --deg 2 --path 5 --num_nodes 50 --batch_size 256 --lr 0.00025 --epochs 30 --eval_every 1 --save_every 2 --model gpt2 --weight_decay 0.1 --eval_train --wandb_entity <fill_in> --use_wandb --seed 1337
 
 To train a GPT-2 classifier for CD or Q#, run the command
-> python train_classifier.py --dataset graph --deg 2 --path 5 --num_nodes 50 --batch_size 256 --lr 0.00025 --epochs 10 --eval_every 1 --save_every 1 --model gpt2 --weight_decay 0.1 --wandb_entity <fill_in> --use_wandb --seed 1337 --compile
+> python train_classifier_pref.py --dataset graph --deg 2 --path 5 --num_nodes 50 --batch_size 256 --lr 0.00025 --epochs 10 --eval_every 1 --save_every 1 --model gpt2 --weight_decay 0.1 --wandb_entity <fill_in> --use_wandb --seed 1337 --compile
 
 We can then use the classifier ckpt to run CD or Q#. Please see `scripts/evaluate.sh` for an example command.
 
